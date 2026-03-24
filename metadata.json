@@ -1,0 +1,5 @@
+{
+  "name": "Guyana Budget Tracker",
+  "description": "A budgeting app to track income and expenses in Guyana dollars, featuring digital envelopes, recurring transactions, and visual reports.",
+  "requestFramePermissions": []
+}
