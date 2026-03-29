@@ -81,11 +81,11 @@ export const Envelopes: React.FC = () => {
     <div className="max-w-6xl mx-auto space-y-8 pb-24 lg:pb-8 animate-in fade-in duration-300">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Budgets</h1>
+          <h1 className="text-3xl font-bold text-app-text tracking-tight">Budgets</h1>
         </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 bg-[#6366F1] hover:bg-[#4F46E5] text-white px-6 py-3 rounded-2xl font-bold transition-colors shadow-lg shadow-[#6366F1]/20"
+          className="flex items-center gap-2 bg-[#6366F1] hover:bg-[#4F46E5] text-app-text px-6 py-3 rounded-2xl font-bold transition-colors shadow-lg shadow-[#6366F1]/20"
         >
           <Plus size={20} />
           <span className="hidden sm:inline">New Budget</span>
@@ -106,20 +106,20 @@ export const Envelopes: React.FC = () => {
           else if (percentSpent > 75) progressColor = 'bg-[#eab308]';
 
           return (
-            <div key={category.id} className="bg-[#141414] rounded-[2rem] border border-white/5 overflow-hidden group hover:border-white/10 transition-colors">
+            <div key={category.id} className="bg-app-card rounded-[2rem] border border-app-border overflow-hidden group hover:border-app-border transition-colors">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
                     <div 
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg" 
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-app-text font-bold text-lg shadow-lg" 
                       style={{ backgroundColor: category.color }}
                     >
                       {category.name.charAt(0)}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{category.name}</h3>
+                      <h3 className="text-xl font-bold text-app-text">{category.name}</h3>
                       {category.parentId && (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-app-muted">
                           Sub-budget of {categories.find(c => c.id === category.parentId)?.name || 'Unknown'}
                         </p>
                       )}
@@ -128,13 +128,13 @@ export const Envelopes: React.FC = () => {
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => handleOpenModal(category)}
-                      className="p-2 text-gray-400 hover:text-[#6366F1] rounded-xl hover:bg-[#6366F1]/10 transition-colors"
+                      className="p-2 text-app-muted hover:text-[#6366F1] rounded-xl hover:bg-[#6366F1]/10 transition-colors"
                     >
                       <Edit2 size={18} />
                     </button>
                     <button 
                       onClick={() => setCategoryToDelete(category.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 rounded-xl hover:bg-red-500/10 transition-colors"
+                      className="p-2 text-app-muted hover:text-red-500 rounded-xl hover:bg-red-500/10 transition-colors"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -144,10 +144,10 @@ export const Envelopes: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-400 font-medium">Spent</span>
-                      <span className="font-bold text-white">{formatCurrency(spent)}</span>
+                      <span className="text-app-muted font-medium">Spent</span>
+                      <span className="font-bold text-app-text">{formatCurrency(spent)}</span>
                     </div>
-                    <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-app-hover rounded-full h-3 overflow-hidden">
                       <div 
                         className={`h-full rounded-full ${progressColor} transition-all duration-500`} 
                         style={{ width: `${percentSpent}%` }}
@@ -155,16 +155,16 @@ export const Envelopes: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-end pt-4 border-t border-white/5">
+                  <div className="flex justify-between items-end pt-4 border-t border-app-border">
                     <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Remaining</p>
-                      <p className={`text-2xl font-bold ${remaining < 0 ? 'text-red-500' : 'text-white'}`}>
+                      <p className="text-xs text-app-muted uppercase tracking-wider font-bold mb-1">Remaining</p>
+                      <p className={`text-2xl font-bold ${remaining < 0 ? 'text-red-500' : 'text-app-text'}`}>
                         {formatCurrency(remaining)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Budget</p>
-                      <p className="text-lg font-bold text-gray-400">
+                      <p className="text-xs text-app-muted uppercase tracking-wider font-bold mb-1">Budget</p>
+                      <p className="text-lg font-bold text-app-muted">
                         {formatCurrency(category.allocatedAmount)}
                       </p>
                     </div>
@@ -179,33 +179,33 @@ export const Envelopes: React.FC = () => {
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#141414] rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-white/5">
-            <div className="flex items-center justify-between p-6 border-b border-white/5">
-              <h2 className="text-xl font-bold text-white">
+          <div className="bg-app-card rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 border border-app-border">
+            <div className="flex items-center justify-between p-6 border-b border-app-border">
+              <h2 className="text-xl font-bold text-app-text">
                 {editingCategory ? 'Edit Budget' : 'New Budget'}
               </h2>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-white transition-colors">
+              <button onClick={handleCloseModal} className="text-app-muted hover:text-app-text transition-colors">
                 <X size={24} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Budget Name</label>
+                <label className="block text-sm font-medium text-app-muted mb-2">Budget Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl focus:ring-2 focus:ring-[#6366F1] outline-none text-white placeholder-gray-600 transition-all"
+                  className="w-full p-4 bg-app-hover border border-app-border rounded-2xl focus:ring-2 focus:ring-[#6366F1] outline-none text-app-text placeholder-gray-600 transition-all"
                   placeholder="e.g., Groceries"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Monthly Budget</label>
+                <label className="block text-sm font-medium text-app-muted mb-2">Monthly Budget</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-lg">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-app-muted font-medium text-lg">$</span>
                   <input
                     type="number"
                     required
@@ -213,44 +213,44 @@ export const Envelopes: React.FC = () => {
                     step="0.01"
                     value={allocatedAmount}
                     onChange={(e) => setAllocatedAmount(e.target.value)}
-                    className="w-full pl-10 pr-4 py-4 bg-white/5 border border-white/5 rounded-2xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none text-2xl font-bold text-white placeholder-gray-600 transition-all"
+                    className="w-full pl-10 pr-4 py-4 bg-app-hover border border-app-border rounded-2xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none text-2xl font-bold text-app-text placeholder-gray-600 transition-all"
                     placeholder="0.00"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Parent Budget (Optional)</label>
+                <label className="block text-sm font-medium text-app-muted mb-2">Parent Budget (Optional)</label>
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  className="w-full p-4 bg-white/5 border border-white/5 rounded-2xl focus:ring-2 focus:ring-[#6366F1] outline-none text-white appearance-none transition-all"
+                  className="w-full p-4 bg-app-hover border border-app-border rounded-2xl focus:ring-2 focus:ring-[#6366F1] outline-none text-app-text appearance-none transition-all"
                 >
-                  <option value="" className="bg-[#141414]">None (Top Level)</option>
+                  <option value="" className="bg-app-card">None (Top Level)</option>
                   {categories
                     .filter(c => c.id !== editingCategory?.id) // Prevent self-referencing
                     .map(cat => (
-                      <option key={cat.id} value={cat.id} className="bg-[#141414]">{cat.name}</option>
+                      <option key={cat.id} value={cat.id} className="bg-app-card">{cat.name}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Color</label>
-                <div className="flex items-center gap-4 p-2 bg-white/5 rounded-2xl border border-white/5">
+                <label className="block text-sm font-medium text-app-muted mb-2">Color</label>
+                <div className="flex items-center gap-4 p-2 bg-app-hover rounded-2xl border border-app-border">
                   <input
                     type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
                     className="h-12 w-12 rounded-xl cursor-pointer border-0 p-0 bg-transparent"
                   />
-                  <span className="text-sm font-bold text-white uppercase">{color}</span>
+                  <span className="text-sm font-bold text-app-text uppercase">{color}</span>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-4 mt-6 bg-[#6366F1] hover:bg-[#4F46E5] text-white rounded-2xl font-bold text-lg transition-colors shadow-lg shadow-[#6366F1]/20"
+                className="w-full py-4 mt-6 bg-[#6366F1] hover:bg-[#4F46E5] text-app-text rounded-2xl font-bold text-lg transition-colors shadow-lg shadow-[#6366F1]/20"
               >
                 {editingCategory ? 'Save Changes' : 'Create Budget'}
               </button>

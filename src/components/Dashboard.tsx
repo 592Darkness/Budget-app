@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
-import { format } from 'date-fns';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 
 export const Dashboard: React.FC = () => {
   const { transactions, categories } = useAppContext();
+  
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isBalanceDropdownOpen, setIsBalanceDropdownOpen] = useState(false);
 
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const currentMonth = selectedDate.getMonth();
+  const currentYear = selectedDate.getFullYear();
 
   const currentMonthTransactions = transactions.filter(tx => {
     const d = new Date(tx.date);
@@ -44,37 +48,125 @@ export const Dashboard: React.FC = () => {
     return { ...cat, spent };
   }).filter(cat => cat.spent > 0).sort((a, b) => b.spent - a.spent);
 
+  // Calendar logic
+  const monthStart = startOfMonth(selectedDate);
+  const monthEnd = endOfMonth(monthStart);
+  const startDate = monthStart;
+  const endDate = monthEnd;
+  const dateFormat = "d";
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+  const handlePrevMonth = () => setSelectedDate(subMonths(selectedDate, 1));
+  const handleNextMonth = () => setSelectedDate(addMonths(selectedDate, 1));
+
+  const hasActivity = (day: Date) => {
+    return currentMonthTransactions.some(tx => isSameDay(new Date(tx.date), day));
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 relative">
       {/* Top Header */}
-      <header className="flex items-center justify-between mb-8">
-        <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#141414] text-white hover:bg-white/10 transition-colors">
+      <header className="flex items-center justify-between mb-8 relative z-20">
+        <button onClick={handlePrevMonth} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-app-card text-app-text hover:bg-app-hover border border-app-border transition-colors">
           <ChevronLeft size={20} />
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#141414] text-white hover:bg-white/10 transition-colors text-sm font-medium">
-          {format(new Date(), 'dd MMM yyyy').toUpperCase()}
-          <ChevronDown size={16} className="text-gray-400" />
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#141414] text-white hover:bg-white/10 transition-colors">
+        
+        <div className="relative">
+          <button 
+            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-app-card text-app-text hover:bg-app-hover border border-app-border transition-colors text-sm font-medium"
+          >
+            <CalendarIcon size={16} className="text-app-muted" />
+            {format(selectedDate, 'MMMM yyyy')}
+            <ChevronDown size={16} className="text-app-muted" />
+          </button>
+
+          {isCalendarOpen && (
+            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 bg-app-card border border-app-border rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-bold text-app-text">{format(selectedDate, 'MMMM yyyy')}</span>
+              </div>
+              <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-app-muted mb-2">
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d}>{d}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: monthStart.getDay() }).map((_, i) => (
+                  <div key={`empty-${i}`} className="h-8" />
+                ))}
+                {days.map((day, i) => {
+                  const active = hasActivity(day);
+                  const today = isToday(day);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setSelectedDate(day);
+                        setIsCalendarOpen(false);
+                      }}
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-sm relative transition-colors ${
+                        today ? 'bg-[#6366F1] text-white font-bold' : 'text-app-text hover:bg-app-hover'
+                      }`}
+                    >
+                      {format(day, dateFormat)}
+                      {active && !today && (
+                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#6366F1]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button onClick={handleNextMonth} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-app-card text-app-text hover:bg-app-hover border border-app-border transition-colors">
           <ChevronRight size={20} />
         </button>
       </header>
 
       {/* Total Balance Card */}
-      <div className="bg-[#141414] p-6 rounded-[2rem] shadow-lg relative overflow-hidden">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-400">Total Balance</h3>
-          <ChevronDown size={20} className="text-gray-400" />
+      <div className="relative z-10">
+        <div 
+          onClick={() => setIsBalanceDropdownOpen(!isBalanceDropdownOpen)}
+          className="bg-app-card p-6 rounded-[2rem] shadow-lg border border-app-border relative overflow-hidden cursor-pointer hover:border-app-muted transition-colors"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-app-muted">Total Balance</h3>
+            <ChevronDown size={20} className={`text-app-muted transition-transform ${isBalanceDropdownOpen ? 'rotate-180' : ''}`} />
+          </div>
+          <p className="text-4xl font-bold text-app-text tracking-tight">
+            {formatCurrency(balance)}
+          </p>
         </div>
-        <p className="text-4xl font-bold text-white tracking-tight">
-          {formatCurrency(balance)}
-        </p>
+
+        {isBalanceDropdownOpen && (
+          <div className="absolute top-full mt-2 left-0 right-0 bg-app-card border border-app-border rounded-[2rem] shadow-2xl p-6 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
+            <h4 className="text-sm font-bold text-app-muted mb-4 uppercase tracking-wider">Balance Overview</h4>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-app-text">Total Income</span>
+                <span className="font-semibold text-green-500">{formatCurrency(totalIncome)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-app-text">Total Expenses</span>
+                <span className="font-semibold text-red-500">-{formatCurrency(totalExpenses)}</span>
+              </div>
+              <div className="h-px bg-app-border w-full my-2" />
+              <div className="flex justify-between items-center">
+                <span className="text-app-text font-bold">Net Savings</span>
+                <span className={`font-bold ${balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {formatCurrency(balance)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Budget Card */}
-      <div className="bg-[#141414] p-6 rounded-[2rem] shadow-lg">
+      <div className="bg-app-card p-6 rounded-[2rem] shadow-lg border border-app-border">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-white">Budget</h3>
+          <h3 className="text-xl font-semibold text-app-text">Budget</h3>
           <button className="px-4 py-1.5 rounded-xl bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold hover:bg-[#6366F1]/20 transition-colors">
             All Budgets
           </button>
@@ -82,16 +174,16 @@ export const Dashboard: React.FC = () => {
         
         <div className="mb-6">
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-3xl font-bold text-white">{formatCurrency(remainingBudget)}</span>
-            <span className="text-sm font-medium text-gray-400">left</span>
+            <span className="text-3xl font-bold text-app-text">{formatCurrency(remainingBudget)}</span>
+            <span className="text-sm font-medium text-app-muted">left</span>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-app-muted">
             -{formatCurrency(totalExpenses)} spent this month
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-white/5 rounded-full h-2 mb-8 overflow-hidden">
+        <div className="w-full bg-app-hover rounded-full h-2 mb-8 overflow-hidden">
           <div 
             className="h-full bg-[#6366F1] rounded-full transition-all duration-1000 ease-out"
             style={{ width: `${budgetProgress}%` }}
@@ -101,10 +193,10 @@ export const Dashboard: React.FC = () => {
         {/* Horizontal Category List */}
         <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
           {categorySpending.map((cat, i) => (
-            <div key={cat.id} className="flex items-center gap-3 bg-white/5 rounded-2xl p-3 min-w-[160px] shrink-0">
+            <div key={cat.id} className="flex items-center gap-3 bg-app-hover rounded-2xl p-3 min-w-[160px] shrink-0">
               <div className="relative w-10 h-10 flex items-center justify-center">
                 <svg className="w-10 h-10 transform -rotate-90">
-                  <circle cx="20" cy="20" r="16" stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
+                  <circle cx="20" cy="20" r="16" stroke="var(--app-border)" strokeWidth="4" fill="none" />
                   <circle 
                     cx="20" cy="20" r="16" 
                     stroke={cat.color} 
@@ -117,7 +209,7 @@ export const Dashboard: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-white">{cat.name}</p>
+                <p className="text-sm font-medium text-app-text">{cat.name}</p>
                 <p className="text-xs font-medium" style={{ color: cat.color }}>
                   {formatCurrency(cat.spent)} spent
                 </p>
@@ -125,15 +217,15 @@ export const Dashboard: React.FC = () => {
             </div>
           ))}
           {categorySpending.length === 0 && (
-            <div className="text-sm text-gray-500 p-2">No expenses yet this month.</div>
+            <div className="text-sm text-app-muted p-2">No expenses yet this month.</div>
           )}
         </div>
       </div>
 
       {/* Categories Chart Card */}
-      <div className="bg-[#141414] p-6 rounded-[2rem] shadow-lg">
+      <div className="bg-app-card p-6 rounded-[2rem] shadow-lg border border-app-border">
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-semibold text-white">Categories</h3>
+          <h3 className="text-xl font-semibold text-app-text">Categories</h3>
           <button className="px-4 py-1.5 rounded-xl bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold hover:bg-[#6366F1]/20 transition-colors">
             Statistics
           </button>
@@ -170,14 +262,14 @@ export const Dashboard: React.FC = () => {
                 );
               });
             })() : (
-              <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--app-border)" strokeWidth="8" />
             )}
           </svg>
           
           {/* Center Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="text-xs font-medium text-gray-400 mb-1">Expense</p>
-            <p className="text-xl font-bold text-white tracking-tight">
+            <p className="text-xs font-medium text-app-muted mb-1">Expense</p>
+            <p className="text-xl font-bold text-app-text tracking-tight">
               {formatCurrency(totalExpenses)}
             </p>
           </div>
